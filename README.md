@@ -1,1 +1,3 @@
 # WordleRush
+
+# Why not WorldleTurdle
