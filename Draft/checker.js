@@ -8,6 +8,7 @@ function checker(guess, goal, dictionary) {
 	    continue;
 	else
 	    return 'wrong'; 
+    }
 	    
     for (let i=0; i<5; i++){
 
@@ -24,8 +25,5 @@ function checker(guess, goal, dictionary) {
 	else 
 	    //box.classList.add('grey');
 	    return 'grey';
-	    
-        }
-
     }
 } 
