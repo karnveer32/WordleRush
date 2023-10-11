@@ -5,7 +5,7 @@ let currentWord = generateWord();
 let maxGuesses = 6;
 let correctGuesses = 0;
 
-function makeGuess(userGuess, dictionary) {
+function validGuess(userGuess, dictionary) {
     if (userGuess.length !== currentWord.length) {
         return { error: 'Invalid guess length' };
     }
@@ -35,5 +35,5 @@ function makeGuess(userGuess, dictionary) {
     }
 }
 
-export default makeGuess;
+export default validGuess;
 
