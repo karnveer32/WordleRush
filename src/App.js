@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const App = () => {
     const [words, setWords] = useState([]); 
     const [generatedWords, setGeneratedWords] = useState([]);
     const [currentWord, setCurrentWord] = useState(null);
-    const [currentGuess, setCurrentGuess] = useState('') 
+    const [currentGuess, setCurrentGuess] = useState(''); 
 
     useEffect(() => {
       async function loadWords() {
