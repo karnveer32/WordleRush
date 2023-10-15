@@ -1,5 +1,5 @@
+import checker from './checker.js';
 import generateWord from './wordGeneration.js';
-import { checker, state } from './checker.js';
 
 let currentWord = generateWord();
 let maxGuesses = 6;
@@ -14,9 +14,9 @@ function validGuess(userGuess, dictionary) {
         return { error: 'Not in word list' };
     }
 
-    checker(userGuess, currentWord, dictionary);
+    const isCorrect = checker(userGuess, currentWord);
 
-    if (userGuess === currentWord) {
+    if (isCorrect) {
         correctGuesses++;
         currentWord = generateWord();
         return {
@@ -36,4 +36,3 @@ function validGuess(userGuess, dictionary) {
 }
 
 export default validGuess;
-
