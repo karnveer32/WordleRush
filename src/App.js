@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useCallback } from 'react';
-import './App.css';
+import './index.css';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -8,7 +8,7 @@ const App = () => {
   const [currentGuess, setCurrentGuess] = useState('');
   const [inputBoxes, setInputBoxes] = useState(['', '', '', '', '']); // 5 input boxes
   const [attempts, GuessAttempts] = useState(0);
-  const [correctGuess, setCorrectGuess] = useState(false);
+  //const [correctGuess, setCorrectGuess] = useState(false);
 
 
 
@@ -40,7 +40,7 @@ const App = () => {
     setInputBoxes(['', '', '', '', '']); // Reset input boxes
     GuessAttempts(0);
     setCurrentGuess('');
-    setCorrectGuess(false);
+    //setCorrectGuess(false);
 
     let num = Math.floor(Math.random() * words.length);
     let word = words[num];
@@ -57,40 +57,40 @@ const App = () => {
   const checkGuess = useCallback((currentGuess) => {
     if (currentGuess === currentWord) {
       console.log('You guessed the word');
-      setCorrectGuess(true);
+      return(true);
       // Color-code or handle correct guess
-      wordGeneration();
-      setCurrentGuess('');
+      //wordGeneration();
+      //setCurrentGuess('');
     } else {
       setCurrentGuess('');
       console.log('Did not guess the word');
       // Color-code or handle incorrect guess
     }
-  }, [currentWord, setCurrentGuess, wordGeneration]);
+  }, [currentWord, setCurrentGuess]);
 
-
-  
 
   //function validGuess(currentGuess) //placeholder (Eric) //reset currentGuess if not valid
   const validGuess = useCallback((currentGuess) => 
   {
     if (currentGuess.length === 5) {
-      checkGuess(currentGuess);
-      if(!correctGuess){
+      //checkGuess(currentGuess);
+      if(!checkGuess(currentGuess)){
         GuessAttempts((prevAttempts) => prevAttempts+1);
+        setInputBoxes(['', '', '', '', ''])
         if(attempts === 5) {
           wordGeneration()
         }
       }
-      else if(correctGuess){
+      else if(checkGuess(currentGuess)){
         wordGeneration();
+        setCurrentGuess('');
       }
     }
   },
-  [checkGuess, correctGuess, attempts, wordGeneration]
+  [checkGuess, attempts, wordGeneration, setCurrentGuess]
   );
   
-  
+
   function isAlpha(str) {
     return /^[a-zA-Z]$/.test(str);
   }
