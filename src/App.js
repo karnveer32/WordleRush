@@ -1,5 +1,6 @@
 import React, { useState, useEffect,useCallback } from 'react';
 import './App.css';
+import checker from './checker';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -54,40 +55,27 @@ const App = () => {
     }
   }, [words, generatedWords]);
 
-  const checkGuess = useCallback((currentGuess) => {
-    if (currentGuess === currentWord) {
-      console.log('You guessed the word');
-      return(true);
-      // Color-code or handle correct guess
-      //wordGeneration();
-      //setCurrentGuess('');
-    } else {
-      setCurrentGuess('');
-      console.log('Did not guess the word');
-      // Color-code or handle incorrect guess
-    }
-  }, [currentWord, setCurrentGuess]);
-
-
   //function validGuess(currentGuess) //placeholder (Eric) //reset currentGuess if not valid
   const validGuess = useCallback((currentGuess) => 
   {
     if (currentGuess.length === 5) {
       //checkGuess(currentGuess);
-      if(!checkGuess(currentGuess)){
+      if(!checker(currentGuess, currentWord)){
         GuessAttempts((prevAttempts) => prevAttempts+1);
         setInputBoxes(['', '', '', '', ''])
+        setCurrentGuess('');
         if(attempts === 5) {
           wordGeneration()
+          setCurrentGuess('');
         }
       }
-      else if(checkGuess(currentGuess)){
+      else{
         wordGeneration();
         setCurrentGuess('');
       }
     }
   },
-  [checkGuess, attempts, wordGeneration, setCurrentGuess]
+  [currentWord, attempts, wordGeneration, setCurrentGuess]
   );
   
 
