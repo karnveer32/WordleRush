@@ -1,6 +1,5 @@
-import React, { useState, useEffect,useCallback } from 'react';
-import './App.css';
-import checker from './checker';
+import React, { useState, useEffect, useCallback } from 'react';
+import './index.css';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -8,10 +7,9 @@ const App = () => {
   const [currentWord, setCurrentWord] = useState(null);
   const [currentGuess, setCurrentGuess] = useState('');
   const [inputBoxes, setInputBoxes] = useState(['', '', '', '', '']); // 5 input boxes
-  const [attempts, GuessAttempts] = useState(0);
+  const [attempts, GuessAttempts] = useState(6);
+  const [guessHistory, setGuessHistory] = useState([]);
   //const [correctGuess, setCorrectGuess] = useState(false);
-
-
 
   useEffect(() => {
     async function loadWords() {
@@ -39,7 +37,7 @@ const App = () => {
     }
 
     setInputBoxes(['', '', '', '', '']); // Reset input boxes
-    GuessAttempts(0);
+    GuessAttempts(6);
     setCurrentGuess('');
     //setCorrectGuess(false);
 
@@ -47,6 +45,7 @@ const App = () => {
     let word = words[num];
 
     setCurrentWord(word);
+    setGuessHistory([])
 
     if (!generatedWords.includes(word)) {
       setGeneratedWords([...generatedWords, word]);
@@ -55,40 +54,62 @@ const App = () => {
     }
   }, [words, generatedWords]);
 
+  const checkGuess = useCallback((currentGuess) => {
+    if (currentGuess === currentWord) {
+      console.log('You guessed the word');
+      return (true);
+      // Color-code or handle correct guess
+      //wordGeneration();
+      //setCurrentGuess('');
+    } else {
+      setCurrentGuess('');
+      console.log('Did not guess the word');
+      // Color-code or handle incorrect guess
+    }
+  }, [currentWord, setCurrentGuess]);
+
+
   //function validGuess(currentGuess) //placeholder (Eric) //reset currentGuess if not valid
-  const validGuess = useCallback((currentGuess) => 
-  {
+  const validGuess = useCallback((currentGuess) => {
     if (currentGuess.length === 5) {
-      //checkGuess(currentGuess);
-      if(!checker(currentGuess, currentWord)){
-        GuessAttempts((prevAttempts) => prevAttempts+1);
-        setInputBoxes(['', '', '', '', ''])
-        setCurrentGuess('');
-        if(attempts === 5) {
-          wordGeneration()
-          setCurrentGuess('');
+      const isCorrect = checkGuess(currentGuess);
+
+      const updatedInputBoxes = [...inputBoxes];
+      for (let i = 0; i < 5; i++) {
+        if (updatedInputBoxes[i] === '') {
+          updatedInputBoxes[i] = currentGuess[i];
         }
       }
-      else{
+
+      if (!isCorrect) {
+        GuessAttempts((prevAttempts) => prevAttempts - 1);
+        setInputBoxes(['', '', '', '', '']);
+
+        setGuessHistory((prevHistory) => [
+          ...prevHistory,
+          { guess: currentGuess, inputBoxes: updatedInputBoxes, correct: isCorrect },
+        ]);
+
+        if (attempts === 1) {
+          wordGeneration();
+        }
+      } else {
         wordGeneration();
-        setCurrentGuess('');
       }
+      setCurrentGuess('');
     }
-  },
-  [currentWord, attempts, wordGeneration, setCurrentGuess]
-  );
-  
+  }, [checkGuess, GuessAttempts, setInputBoxes, attempts, wordGeneration, setCurrentGuess, inputBoxes]);
 
   function isAlpha(str) {
     return /^[a-zA-Z]$/.test(str);
   }
-  
+
   const userInput = useCallback(
     ({ key }) => {
       if (isAlpha(key)) {
         if (currentGuess.length < 5) {
           setCurrentGuess((currentGuess) => currentGuess + key);
-  
+
           // Update the corresponding input box
           const updatedBoxes = [...inputBoxes];
           for (let i = 0; i < 5; i++) {
@@ -101,7 +122,7 @@ const App = () => {
         }
       } else if (key === 'Backspace') {
         setCurrentGuess((currentGuess) => currentGuess.substring(0, currentGuess.length - 1));
-  
+
         // Update the corresponding input box
         const updatedBoxes = [...inputBoxes];
         for (let i = 4; i >= 0; i--) {
@@ -119,14 +140,14 @@ const App = () => {
   );
 
   useEffect(() => {
-    try{
-    window.addEventListener('keydown', userInput);
+    try {
+      window.addEventListener('keydown', userInput);
 
-    return () => {
-      window.removeEventListener('keydown', userInput);
+      return () => {
+        window.removeEventListener('keydown', userInput);
+      }
     }
-  }
-    catch(error) {
+    catch (error) {
       console.error('Error getting a word', error);
     };
   }, [userInput]);
@@ -138,9 +159,9 @@ const App = () => {
       <button onClick={wordGeneration}>Generate Word</button>
       {currentWord && (
         <div>
-            <p>Generated Word: {currentWord} </p>
-            <p> Current Guess: {currentGuess} </p>
-          
+          <p>Generated Word: {currentWord} </p>
+          <p> Current Guess: {currentGuess} </p>
+
           <div>
             {inputBoxes.map((letter, index) => (
               <input
@@ -152,11 +173,35 @@ const App = () => {
               />
             ))}
           </div>
+
         </div>
       )}
-      <p>Attempts: {attempts}/6</p>
+
+      <div>
+        <p>Attempts: {attempts}/6</p>
+        <div>
+          <p>Guess History:</p>
+          <div className="guess-history">
+            {guessHistory.map((word, index) => (
+              <div key={index} >
+                {word.inputBoxes.map((letter, boxIndex) => (
+                  <input
+                    key={boxIndex}
+                    type="text"
+                    defaultValue={letter}
+                    disabled={true}
+                    style={{ width: '30px', marginRight: '5px' }}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
 
 export default App;
+
