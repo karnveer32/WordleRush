@@ -36,3 +36,24 @@
     transform: rotate(360deg);
   }
 }
+
+.box {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #D3D3D3;
+    margin: 4px;
+    text-transform: uppercase;
+    display: grid; 
+}
+
+.box.green {
+    background: #90EE90;
+}
+
+.box.yellow {
+    background: #FDFA72; 
+}
+
+.box.grey {
+    background: #D3D3D3;
+}
