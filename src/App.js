@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './index.css';
+import './App.css';
 
 const App = () => {
   const [words, setWords] = useState([]);
