@@ -43,7 +43,7 @@ const App = () => {
     //setCorrectGuess(false);
 
     let num = Math.floor(Math.random() * words.length);
-    let word = words[num];
+    let word = words[num].toUpperCase();
 
     setCurrentWord(word);
     setGuessHistory([])
@@ -89,7 +89,7 @@ const App = () => {
       }
     }
   }, 
-  [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess]);
+  [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes]);
 
   function isAlpha(str) {
     return /^[a-zA-Z]$/.test(str);
@@ -98,6 +98,7 @@ const App = () => {
   const userInput = useCallback(
     ({ key }) => {
       if (isAlpha(key)) {
+        key=key.toUpperCase()
         if (currentGuess.length < 5) {
           setCurrentGuess((currentGuess) => currentGuess + key);
 
@@ -175,14 +176,15 @@ return (
         <p>Guess History:</p>
         <div>
           {guessHistory.map((word, index) => (
-            <div key={index}>
+            <div key={index} className = "grid">
               {word.inputBoxes.map((letter, boxIndex) => (
                 <input
                   key={boxIndex}
                   type="text"
                   defaultValue={letter}
                   disabled={true}
-		  style={{ width: '30px', marginRight: '5px' }}
+                  className={letter === currentWord[boxIndex] ? 'box green' :
+                  (letter && currentWord.includes(letter)) ? 'box yellow' : 'box grey'}
                 />
               ))}
             </div>
@@ -197,3 +199,4 @@ return (
 
 export default App;
 
+//style={{ width: '30px', marginRight: '5px' }}
