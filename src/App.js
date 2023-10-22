@@ -143,55 +143,56 @@ const App = () => {
     };
   }, [userInput]);
 
-  return (
-    <div className="App">
-      <h1><center>WordleRush</center></h1>
-      <h1><center>Word Generator</center></h1>
-      <button onClick={wordGeneration}>Generate Word</button>
-      {currentWord && (
-        <div>
-          <p>Generated Word: {currentWord} </p>
-          <p> Current Guess: {currentGuess} </p>
+return (
+  <div className="App">
+    <h1><center>WordleRush</center></h1>
+    <h1><center>Word Generator</center></h1>
+    <button onClick={wordGeneration}>Generate Word</button>
+    {currentWord && (
+      <div>
+        <p>Generated Word: {currentWord} </p>
+        <p> Current Guess: {currentGuess} </p>
 
-          <div>
-            {inputBoxes.map((letter, index) => (
+        <div className="grid">
+          {inputBoxes.map((letter, index) => (
+            <div key={index} className="box">
               <input
-                key={index}
                 type="text"
                 defaultValue={letter}
                 disabled={letter !== ''}
-                style={{ width: '30px', marginRight: '5px' }}
+                className={letter === currentWord[index] ? 'box green' :
+                  (letter && currentWord.includes(letter)) ? 'box yellow' : 'box grey'}
               />
-            ))}
-          </div>
-
-        </div>
-      )}
-
-      <div>
-        <p>Attempts: {attempts}/6</p>
-        <div>
-          <p>Guess History:</p>
-          <div className="guess-history">
-            {guessHistory.map((word, index) => (
-              <div key={index} >
-                {word.inputBoxes.map((letter, boxIndex) => (
-                  <input
-                    key={boxIndex}
-                    type="text"
-                    defaultValue={letter}
-                    disabled={true}
-                    style={{ width: '30px', marginRight: '5px' }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
+    )}
 
+    <div>
+      <p>Attempts: {attempts}/6</p>
+      <div>
+        <p>Guess History:</p>
+        <div>
+          {guessHistory.map((word, index) => (
+            <div key={index}>
+              {word.inputBoxes.map((letter, boxIndex) => (
+                <input
+                  key={boxIndex}
+                  type="text"
+                  defaultValue={letter}
+                  disabled={true}
+		  style={{ width: '30px', marginRight: '5px' }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default App;

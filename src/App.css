@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
@@ -37,23 +37,33 @@
   }
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 50px);
+  justify-content: center;
+  align-items: center; 
+  gap: 4px;
+  display:grid; 
+}
+
 .box {
-    width: 50px;
-    height: 50px;
-    border: 2px solid #D3D3D3;
-    margin: 4px;
-    text-transform: uppercase;
-    display: grid; 
+  display: grid; 
+  width: 50px;
+  height: 50px;
+  margin: 4px;
+  text-transform: uppercase;
+  
 }
 
 .box.green {
-    background: #90EE90;
+  background: #90EE90;
 }
 
 .box.yellow {
-    background: #FDFA72; 
+  background: #FDFA72;
 }
 
 .box.grey {
-    background: #D3D3D3;
+  background: #D3D3D3;
 }
+
