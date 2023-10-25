@@ -15,7 +15,7 @@ const App = () => {
   useEffect(() => {
     async function loadWords() {
       try {
-        const response = await fetch('words.txt');
+        const response = await fetch('temp_words.txt');
         if (!response.ok) {
           throw new Error('Network response was not ok.');
         }
