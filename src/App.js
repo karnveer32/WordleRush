@@ -147,13 +147,10 @@ const App = () => {
 return (
   <div className="App">
     <h1><center>WordleRush</center></h1>
-    <h1><center>Word Generator</center></h1>
+    
     <button onClick={wordGeneration}>Generate Word</button>
     {currentWord && (
       <div>
-        <p>Generated Word: {currentWord} </p>
-        <p> Current Guess: {currentGuess} </p>
-
         <div className="grid">
           {inputBoxes.map((letter, index) => (
             <div key={index} className="box">
@@ -200,3 +197,6 @@ return (
 export default App;
 
 //style={{ width: '30px', marginRight: '5px' }}
+//<h1><center>Word Generator</center></h1> 
+//<p>Generated Word: {currentWord} </p>
+//<p> Current Guess: {currentGuess} </p>
