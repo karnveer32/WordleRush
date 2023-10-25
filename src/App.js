@@ -9,6 +9,7 @@ const App = () => {
   const [currentGuess, setCurrentGuess] = useState('');
   const [inputBoxes, setInputBoxes] = useState(['', '', '', '', '']); // 5 input boxes
   const [attempts, GuessAttempts] = useState(6);
+  const [counts, Counter] = useState(0);
   const [guessHistory, setGuessHistory] = useState([]);
   //const [correctGuess, setCorrectGuess] = useState(false);
 
@@ -86,6 +87,7 @@ const App = () => {
       else {
         wordGeneration();
         setCurrentGuess('');
+        Counter((counts) => counts + 1);
       }
     }
   }, 
@@ -158,8 +160,8 @@ return (
                 type="text"
                 defaultValue={letter}
                 disabled={letter !== ''}
-                className={letter === currentWord[index] ? 'box green' :
-                  (letter && currentWord.includes(letter)) ? 'box yellow' : 'box grey'}
+                className={letter === currentWord[index] ? 'box grey' :
+                  (letter && currentWord.includes(letter)) ? 'box grey' : 'box grey'}
               />
             </div>
           ))}
@@ -171,6 +173,7 @@ return (
       <p>Attempts: {attempts}/6</p>
       <div>
         <p>Guess History:</p>
+        <p>Counter: {counts}</p>
         <div>
           {guessHistory.map((word, index) => (
             <div key={index} className = "grid">
