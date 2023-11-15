@@ -1,73 +1,183 @@
 .App {
-    text-align: center;
+  text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+height: 40vmin;
+pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+}
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+background-color: #282c34;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+font-size: calc(10px + 2vmin);
+color: white;
 }
 
 .App-link {
-  color: #61dafb;
+color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+from {
+  transform: rotate(0deg);
+}
+to {
+  transform: rotate(360deg);
+}
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(5, 50px);
-  justify-content: center;
-  align-items: center; 
-  gap: 4px;
-  display:grid; 
+display: grid;
+grid-template-columns: repeat(5, 50px);
+justify-content: center;
+align-items: center; 
+gap: 4px;
+display:grid; 
 }
 
 .box {
-  display: grid; 
-  width: 50px;
-  height: 50px;
+display: grid; 
+width: 50px;
+height: 50px;
+margin: 4px;
+text-transform: uppercase;
+
+}
+
+.row {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+.row > div {
+  display: block;
+  width: 60px;
+  height: 60px;
+  border: 1px solid #bbb;
   margin: 4px;
+  text-align: center;
+  line-height: 60px;
   text-transform: uppercase;
-  
+  font-weight: bold;
+  font-size: 2.5em;
+}
+
+.row > div.green {
+  background: #5ac85a;
+  border-color: #5ac85a;
+}
+.row > div.grey {
+  background: #a1a1a1;
+  border-color: #a1a1a1;
+}
+.row > div.yellow {
+  background: #e2cc68;
+  border-color: #e2cc68;
 }
 
 .box.green {
-  background: #90EE90;
+background: #90EE90;
 }
 
 .box.yellow {
-  background: #FDFA72;
+background: #FDFA72;
 }
 
 .box.grey {
-  background: #D3D3D3;
+background: #D3D3D3;
 }
 
 .box.white{
-  background: #ffffff;
+background: #ffffff;
 }
 
+.modal {
+  display: none; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 10;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Style the modal content box */
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center; 
+}
+
+/* Style for the close button */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+}
+
+.stats-icon {
+  position: fixed;
+  top: 20px; 
+  right: 20px;
+  cursor: pointer;
+  z-index: 11; 
+  font-size: 1.5em;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.qwerty-keyboard {
+display: flex;
+flex-direction: column;
+align-items: center;
+margin-top: 20px;
+}
+
+.keyboard-row {
+display: flex;
+justify-content: center;
+}
+
+.keyboard-key {
+padding: 15px;
+margin: 5px;
+border: 1px solid #ccc;
+cursor: pointer;
+user-select: none;
+border-radius: 8px; /* Add rounded corners */
+}
+
+.correct {
+background-color: #90EE90; 
+}
+
+.in-guess {
+background-color: #e2cc68; 
+}
+
+
+.guessed {
+background-color: #e2cc68; 
+}
+
+.press {
+background-color: #add8e6; /* Light blue for keys pressed */
+}

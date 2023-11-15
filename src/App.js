@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
+import Grid from './Grid';
 import checker from './checker';
+import QwertyKeyboard from './QwertyKeyboard';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -8,10 +10,43 @@ const App = () => {
   const [currentWord, setCurrentWord] = useState(null);
   const [currentGuess, setCurrentGuess] = useState('');
   const [inputBoxes, setInputBoxes] = useState(['', '', '', '', '']); // 5 input boxes
-  const [attempts, GuessAttempts] = useState(6);
+  const [attempts, GuessAttempts] = useState(0);
   const [counts, Counter] = useState(0);
-  const [guessHistory, setGuessHistory] = useState([]);
-  //const [correctGuess, setCorrectGuess] = useState(false);
+  const [guessHistory, setGuessHistory] = useState(new Array(6).fill(undefined));
+  const [isActive, setIsActive] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState(1);
+  const [seconds, setSeconds] = useState(selectedDuration * 60);
+  const [showStats, setShowStats] = useState(false);
+  const [userStartedTyping, setUserStartedTyping] = useState(false);
+
+  const handleDurationChange = (event) => {
+    setSelectedDuration(parseInt(event.target.value));
+    setSeconds(parseInt(event.target.value) * 60);
+  };
+
+  const [gameStats, setGameStats] = useState({
+    played: 0,
+    correct: 0,
+    time: selectedDuration,
+  });
+
+  const toggleStats = () => {
+    if (!timerActive) {
+      setShowStats(!showStats);
+    } else {
+      alert("You cannot view statistics while the game is in progress.");
+    }
+  };
+
+  const startTimer = () => {
+    setIsActive(true);
+    setTimerActive(true);
+  };
+
+  const formatTime = () => {
+    return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     async function loadWords() {
@@ -31,6 +66,27 @@ const App = () => {
     loadWords();
   }, []);
 
+  useEffect(() => {
+    let interval;
+
+    if (isActive && seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds(seconds - 1);
+      }, 1000);
+    } else if (seconds === 0 && isActive) {
+      setIsActive(false);
+      setTimerActive(false);
+      setGameStats((prevStats) => ({
+        ...prevStats,
+        played: prevStats.played + 1,  
+        correct: counts,
+        time: selectedDuration,
+      }));
+      setShowStats(true);
+    }
+
+    return () => clearInterval(interval);
+  }, [isActive, seconds, counts, selectedDuration]);
 
   const wordGeneration = useCallback(() => {
     if (words.length === 0) {
@@ -39,24 +95,24 @@ const App = () => {
     }
 
     setInputBoxes(['', '', '', '', '']); // Reset input boxes
-    GuessAttempts(6);
+    GuessAttempts(0);
     setCurrentGuess('');
-    //setCorrectGuess(false);
+    setUserStartedTyping(false);
 
     let num = Math.floor(Math.random() * words.length);
     let word = words[num].toUpperCase();
 
     setCurrentWord(word);
-    setGuessHistory([])
-
+    setGuessHistory(new Array(6).fill(undefined));
+    
     if (!generatedWords.includes(word)) {
-      setGeneratedWords([...generatedWords, word]);
+      setGeneratedWords(generatedWords => [...generatedWords, word]);
     } else {
       console.log(word + ' was already generated.');
+      wordGeneration();
     }
   }, [words, generatedWords]);
 
-  //function validGuess(currentGuess) //placeholder (Eric) //reset currentGuess if not valid
   const validGuess = useCallback((currentGuess) => {
     if (currentGuess.length === 5) {
       const isCorrect = checker(currentGuess, currentWord);
@@ -69,29 +125,34 @@ const App = () => {
       }
 
       if (!isCorrect) {
-        GuessAttempts((prevAttempts) => prevAttempts - 1);
+        GuessAttempts((prevAttempts) => prevAttempts + 1);
         setInputBoxes(['', '', '', '', '']);
         setCurrentGuess('');
 
-        setGuessHistory((prevHistory) => [
-          ...prevHistory,
-          { guess: currentGuess, inputBoxes: updatedInputBoxes, correct: isCorrect },
-        ]);
+        const newGuessEntry = currentGuess;
 
-        if (attempts === 1) {
+        setGuessHistory((prevHistory) => {
+          const historyCopy = [...prevHistory];
+          const undefinedIndex = historyCopy.findIndex((entry) => entry === undefined);
+          if (undefinedIndex !== -1) {
+            historyCopy[undefinedIndex] = newGuessEntry;
+          }
+          return historyCopy;
+        });
+
+        console.log(guessHistory);
+
+        if (attempts === 5) {
           wordGeneration();
           setCurrentGuess('');
         }
-      } 
-      
-      else {
+      } else {
+        Counter((counts) => counts + 1);
         wordGeneration();
         setCurrentGuess('');
-        Counter((counts) => counts + 1);
       }
     }
-  }, 
-  [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes]);
+  }, [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes, guessHistory]);
 
   function isAlpha(str) {
     return /^[a-zA-Z]$/.test(str);
@@ -99,107 +160,160 @@ const App = () => {
 
   const userInput = useCallback(
     ({ key }) => {
-      if (isAlpha(key)) {
-        key=key.toUpperCase()
-        if (currentGuess.length < 5) {
-          setCurrentGuess((currentGuess) => currentGuess + key);
+      if (!userStartedTyping) {
+        setUserStartedTyping(true);
+        startTimer();
+      }
+      if (timerActive) {
+        if (isAlpha(key)) {
+          key = key.toUpperCase();
+          if (currentGuess.length < 5) {
+            setCurrentGuess((currentGuess) => currentGuess + key);
 
-          // Update the corresponding input box
+            const updatedBoxes = [...inputBoxes];
+            for (let i = 0; i < 5; i++) {
+              if (updatedBoxes[i] === '') {
+                updatedBoxes[i] = key;
+                setInputBoxes(updatedBoxes);
+                break;
+              }
+            }
+          }
+        } else if (key === 'Backspace') {
+          setCurrentGuess((currentGuess) => currentGuess.substring(0, currentGuess.length - 1));
+
           const updatedBoxes = [...inputBoxes];
-          for (let i = 0; i < 5; i++) {
-            if (updatedBoxes[i] === '') {
-              updatedBoxes[i] = key;
+          for (let i = 4; i >= 0; i--) {
+            if (updatedBoxes[i] !== '') {
+              updatedBoxes[i] = '';
               setInputBoxes(updatedBoxes);
               break;
             }
           }
+        } else if (key === 'Enter') {
+          validGuess(currentGuess);
         }
-      } else if (key === 'Backspace') {
-        setCurrentGuess((currentGuess) => currentGuess.substring(0, currentGuess.length - 1));
-
-        // Update the corresponding input box
-        const updatedBoxes = [...inputBoxes];
-        for (let i = 4; i >= 0; i--) {
-          if (updatedBoxes[i] !== '') {
-            updatedBoxes[i] = '';
-            setInputBoxes(updatedBoxes);
-            break;
-          }
-        }
-      } else if (key === 'Enter') {
-        validGuess(currentGuess);
       }
     },
-    [currentGuess, validGuess, inputBoxes]
+    [currentGuess, validGuess, inputBoxes, timerActive, userStartedTyping]
   );
 
   useEffect(() => {
-    try {
-      window.addEventListener('keydown', userInput);
+    window.addEventListener('keydown', userInput);
 
-      return () => {
-        window.removeEventListener('keydown', userInput);
-      }
-    }
-    catch (error) {
-      console.error('Error getting a word', error);
+    return () => {
+      window.removeEventListener('keydown', userInput);
     };
   }, [userInput]);
 
-return (
-  <div className="App">
-    <h1><center>WordleRush</center></h1>
-    
-    <button onClick={wordGeneration}>Generate Word</button>
-    {currentWord && (
-      <div>
-        <div className="grid">
-          {inputBoxes.map((letter, index) => (
-            <div key={index} className="box">
-              <input
-                type="text"
-                defaultValue={letter}
-                disabled={letter !== ''}
-                className={letter === currentWord[index] ? 'box grey' :
-                  (letter && currentWord.includes(letter)) ? 'box grey' : 'box grey'}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+  return (
+    <div className="App">
+      <h1>
+        <center>WordleRush</center>
+      </h1>
 
-    <div>
-      <p>Attempts: {attempts}/6</p>
+      <div className="stats-icon" onClick={toggleStats}>📊</div>
+
+      {showStats && (
+        <div className="modal show"> 
+          <div className="modal-content">
+            <span className="close" onClick={() => setShowStats(false)}>&times;</span>
+              <h2>STATISTICS</h2>
+              <p>Played: {gameStats.played}</p>
+              <p>Time: {gameStats.time} minute(s)</p>
+              <p>Correct: {gameStats.correct}</p>
+          </div>
+        </div>
+      )}
+
       <div>
-        <p>Guess History:</p>
-        <p>Counter: {counts}</p>
+        <label>Select Time:</label>
+        <select value={selectedDuration} onChange={handleDurationChange}>
+          <option value={1}>1 minute</option>
+          <option value={2}>2 minute</option>
+          <option value={3}>3 minute</option>
+        </select>
+      </div>
+
+      <button onClick={wordGeneration}>Generate Word</button>
+      {currentWord && (
         <div>
-          {guessHistory.map((word, index) => (
-            <div key={index} className = "grid">
-              {word.inputBoxes.map((letter, boxIndex) => (
+          <div className="grid">
+            {/*
+            {inputBoxes.map((letter, index) => (
+              <div key={index} className="box">
                 <input
-                  key={boxIndex}
                   type="text"
                   defaultValue={letter}
-                  disabled={true}
-                  className={letter === currentWord[boxIndex] ? 'box green' :
-                  (letter && currentWord.includes(letter)) ? 'box yellow' : 'box grey'}
+                  disabled={letter !== ''}
+                  className={
+                    letter === currentWord[index]
+                      ? 'box grey'
+                      : letter && currentWord.includes(letter)
+                      ? 'box grey'
+                      : 'box grey'
+                  }
                 />
-              ))}
+              </div>
+            ))}
+                */}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <p>Attempts: {attempts}/6</p>
+        {currentWord && (
+          <Grid guesses={guessHistory} currentGuess={currentGuess} attempt={attempts} currentWord={currentWord} />
+        )}
+        <div>
+          {/*<p>Guess History:</p> */}
+          <p>Counter: {counts}</p>
+          <p>{formatTime()}</p>
+          <div>
+            {guessHistory.map((word, index) => (
+              <div key={index} className="grid">
+                {word && word.inputBoxes && word.inputBoxes.map((letter, boxIndex) => (
+                  <input
+                    key={boxIndex}
+                    type="text"
+                    defaultValue={letter}
+                    disabled={true}
+                    className={
+                      letter === currentWord[boxIndex]
+                        ? 'box green'
+                        : letter && currentWord.includes(letter)
+                        ? 'box yellow'
+                        : 'box grey'
+                    }
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+          {seconds === 0 && attempts > 0 && (
+            <div>
+              <p>Time's Up! The correct words were:</p>
+              <ul>
+                {generatedWords.map((word, index) => (
+                  <li key={index}>
+                    <strong>Round {index + 1}:</strong> {word}
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
+          )}
         </div>
       </div>
+      {/* Render the QwertyKeyboard component underneath the grid */}
+      <QwertyKeyboard
+	  onKeyPress={userInput}
+	  guessHistory={guessHistory}
+	  currentWord={currentWord}
+	  currentGuess={currentGuess}
+      />
     </div>
-  </div>
-);
-
-}
+  );
+};
 
 export default App;
-
-//style={{ width: '30px', marginRight: '5px' }}
-//<h1><center>Word Generator</center></h1> 
-//<p>Generated Word: {currentWord} </p>
-//<p> Current Guess: {currentGuess} </p>
