@@ -3,6 +3,10 @@ import './App.css';
 import Grid from './Grid';
 import checker from './checker';
 import QwertyKeyboard from './QwertyKeyboard';
+import statsIcon from './images/stats-icon.png'
+import exitIcon from './images/x-out.png'
+import HowToPlay from './HowToPlay';
+import ReactSwitch from 'react-switch';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -15,14 +19,40 @@ const App = () => {
   const [guessHistory, setGuessHistory] = useState(new Array(6).fill(undefined));
   const [isActive, setIsActive] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(1);
+  const [selectedDuration, setSelectedDuration] = useState(0.5);
   const [seconds, setSeconds] = useState(selectedDuration * 60);
   const [showStats, setShowStats] = useState(false);
   const [userStartedTyping, setUserStartedTyping] = useState(false);
+  //const [roundCounter, setRoundCounter] = useState(0);
+  const [rounds, setRounds] = useState(0);
+  const [showTutorial, setTutorial] = useState(false);
+  const [theme, setTheme] = useState('light');
+  const [checked, setChecked] = useState(false);
+
+  const toggleTheme = val => {
+    setChecked(val)
+    if (theme === 'light') {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  };
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
+  const displayTutorial = () => {
+    setTutorial(true);
+  }
+
+  const closeTutorial = () => {
+    setTutorial(false);
+  }
 
   const handleDurationChange = (event) => {
-    setSelectedDuration(parseInt(event.target.value));
-    setSeconds(parseInt(event.target.value) * 60);
+    setSelectedDuration(parseFloat(event.target.value));
+    setSeconds(parseFloat(event.target.value));
   };
 
   const [gameStats, setGameStats] = useState({
@@ -39,9 +69,30 @@ const App = () => {
     }
   };
 
+  const closeStats = () => setShowStats(false);
+
   const startTimer = () => {
     setIsActive(true);
     setTimerActive(true);
+  };
+
+  const restartGame = () => {
+    setIsActive(false);
+    setTimerActive(false);
+    //setWords([]); // Reset words
+    setGeneratedWords([]); // Reset generated words
+    setCurrentWord(null);
+    setCurrentGuess('');
+    setInputBoxes(['', '', '', '', '']); // Reset input boxes
+    GuessAttempts(0); // Reset attempts
+    Counter(0); // Reset counts
+    setGuessHistory(new Array(6).fill(undefined));
+    setSeconds(selectedDuration);
+    setGameStats({
+      played: 0,
+      correct: 0,
+      time: selectedDuration,
+    });
   };
 
   const formatTime = () => {
@@ -85,9 +136,12 @@ const App = () => {
       setShowStats(true);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    }
   }, [isActive, seconds, counts, selectedDuration]);
 
+  //WORD GENERATION FUNCTION
   const wordGeneration = useCallback(() => {
     if (words.length === 0) {
       console.error('No words loaded from the text file.');
@@ -98,6 +152,7 @@ const App = () => {
     GuessAttempts(0);
     setCurrentGuess('');
     setUserStartedTyping(false);
+    setRounds(rounds => rounds + 1);
 
     let num = Math.floor(Math.random() * words.length);
     let word = words[num].toUpperCase();
@@ -107,12 +162,21 @@ const App = () => {
     
     if (!generatedWords.includes(word)) {
       setGeneratedWords(generatedWords => [...generatedWords, word]);
+      //setRoundCounter(roundCounter => roundCounter +1);
+      console.log(word);
     } else {
       console.log(word + ' was already generated.');
       wordGeneration();
     }
   }, [words, generatedWords]);
 
+  useEffect(() => {
+    if (!isActive && generatedWords.length === 0) {
+      wordGeneration();
+    }
+  }, [isActive, generatedWords, wordGeneration]); 
+  
+  //CHECKS USER GUESS
   const validGuess = useCallback((currentGuess) => {
     if (currentGuess.length === 5) {
       const isCorrect = checker(currentGuess, currentWord);
@@ -154,10 +218,12 @@ const App = () => {
     }
   }, [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes, guessHistory]);
 
+  //CAPITALIZES THE GUESS
   function isAlpha(str) {
     return /^[a-zA-Z]$/.test(str);
   }
 
+  //HANDLES USER INPUT
   const userInput = useCallback(
     ({ key }) => {
       if (!userStartedTyping) {
@@ -206,63 +272,94 @@ const App = () => {
     };
   }, [userInput]);
 
+
+  //HTML PORTION 
   return (
-    <div className="App">
-      <h1>
-        <center>WordleRush</center>
-      </h1>
-
-      <div className="stats-icon" onClick={toggleStats}>📊</div>
-
-      {showStats && (
-        <div className="modal show"> 
-          <div className="modal-content">
-            <span className="close" onClick={() => setShowStats(false)}>&times;</span>
-              <h2>STATISTICS</h2>
-              <p>Played: {gameStats.played}</p>
-              <p>Time: {gameStats.time} minute(s)</p>
-              <p>Correct: {gameStats.correct}</p>
-          </div>
+    <div className={`App ${theme}`}>
+        <h1>WordleRush</h1>
+        <div className='theme-toggle'>
+          <h4>Dark Mode</h4>
+          <ReactSwitch
+            checked={checked}
+            onChange={toggleTheme}
+          />
         </div>
-      )}
 
-      <div>
-        <label>Select Time:</label>
-        <select value={selectedDuration} onChange={handleDurationChange}>
-          <option value={1}>1 minute</option>
-          <option value={2}>2 minute</option>
-          <option value={3}>3 minute</option>
-        </select>
+      <div className="Tutorial" onClick={displayTutorial}>
+        <span>ℹ️</span>
       </div>
 
-      <button onClick={wordGeneration}>Generate Word</button>
-      {currentWord && (
-        <div>
-          <div className="grid">
-            {/*
-            {inputBoxes.map((letter, index) => (
-              <div key={index} className="box">
-                <input
-                  type="text"
-                  defaultValue={letter}
-                  disabled={letter !== ''}
-                  className={
-                    letter === currentWord[index]
-                      ? 'box grey'
-                      : letter && currentWord.includes(letter)
-                      ? 'box grey'
-                      : 'box grey'
-                  }
-                />
+      {showTutorial && <HowToPlay onClose={closeTutorial} />}
+
+     {/*<div className="stats-icon" onClick={toggleStats}>📊</div>*/}
+
+     {showStats ? (
+        <div className="close-icon" onClick={toggleStats} style={{ backgroundImage: `url(${exitIcon})` }}></div>
+      ) : (
+        <div className="stats-icon" onClick={toggleStats} style={{ backgroundImage: `url(${statsIcon})` }}></div>
+      )}
+
+
+      {showStats && (
+        <div className="modal show">
+        <div className="modal-content">
+          <span className="close" onClick={closeStats}>&times;</span>
+          <h2>STATISTICS</h2>
+          <div className="stats-container">
+            <div className="stat-item">
+              <span className="stat-label">Games Played: </span>
+              <span className="stat-value">{gameStats.played}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Rounds Played: </span>
+              <span className="stat-value">{rounds}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Time: </span>
+              <span className="stat-value">{gameStats.time} second(s)</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Correct Guesses: </span>
+              <span className="stat-value">{gameStats.correct}</span>
+            </div>
+            {seconds === 0 && attempts > 0 && (
+              <div>
+                <p>Time's Up! The correct words were:</p>
+                <ul>
+                  {generatedWords.map((word, index) => (
+                    <li key={index}>
+                      <strong>Round {index + 1}:</strong> {word}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-                */}
+            )}
           </div>
         </div>
+      </div>
       )}
 
       <div>
-        <p>Attempts: {attempts}/6</p>
+        {timerActive ? (
+          <p>Timer is Running....</p>
+        ) : (
+          <div>
+          <label>Select Time:</label>
+          <select value={selectedDuration} onChange={handleDurationChange}>
+            <option value={30}>30 seconds</option>
+            <option value={60}>60 seconds</option>
+            <option value={90}>90 seconds</option>
+            <option value={120}>120 seconds</option>
+          </select>
+        </div>
+        )}
+      </div>
+
+      {/*<button onClick={wordGeneration}>Generate Word</button>*/}
+      <button onClick={restartGame}> Restart Game </button>
+
+      <div>
+        {/*<p>Attempts: {attempts}/6</p>*/}
         {currentWord && (
           <Grid guesses={guessHistory} currentGuess={currentGuess} attempt={attempts} currentWord={currentWord} />
         )}
@@ -291,16 +388,16 @@ const App = () => {
               </div>
             ))}
           </div>
-          {seconds === 0 && attempts > 0 && (
+          {seconds === 0 && (
             <div>
               <p>Time's Up! The correct words were:</p>
-              <ul>
-                {generatedWords.map((word, index) => (
-                  <li key={index}>
-                    <strong>Round {index + 1}:</strong> {word}
-                  </li>
-                ))}
-              </ul>
+                <div className='rounds'>
+                  {generatedWords.map((word, index) => (
+                    <div key={index+1}> 
+                        <strong>Round {index + 1}:</strong> {/*{index + 1 <= roundCounter ? word : ''}*/}
+                    </div>
+                  ))}
+                </div>
             </div>
           )}
         </div>
@@ -317,3 +414,9 @@ const App = () => {
 };
 
 export default App;
+
+//get rid of attempts
+//restart button 
+//fade out select time after a game started
+//generate word
+//counter and time moved
