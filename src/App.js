@@ -327,9 +327,9 @@ const App = () => {
                 <p>Time's Up! The correct words were:</p>
                 <ul>
                   {generatedWords.map((word, index) => (
-                    <li key={index}>
+                    <div key={index}>
                       <strong>Round {index + 1}:</strong> {word}
-                    </li>
+                    </div>
                   ))}
                 </ul>
               </div>
