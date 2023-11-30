@@ -23,12 +23,12 @@ const App = () => {
   const [seconds, setSeconds] = useState(selectedDuration * 60);
   const [showStats, setShowStats] = useState(false);
   const [userStartedTyping, setUserStartedTyping] = useState(false);
-  //const [roundCounter, setRoundCounter] = useState(0);
   const [rounds, setRounds] = useState(0);
   const [showTutorial, setTutorial] = useState(false);
   const [theme, setTheme] = useState('light');
   const [checked, setChecked] = useState(false);
 
+  //DARK & LIGHT MODE FUNCTIONS
   const toggleTheme = val => {
     setChecked(val)
     if (theme === 'light') {
@@ -42,6 +42,7 @@ const App = () => {
     document.body.className = theme;
   }, [theme]);
 
+  //TUTORIAL FUNCTIONS
   const displayTutorial = () => {
     setTutorial(true);
   }
@@ -50,11 +51,13 @@ const App = () => {
     setTutorial(false);
   }
 
+  //TIMER
   const handleDurationChange = (event) => {
     setSelectedDuration(parseFloat(event.target.value));
     setSeconds(parseFloat(event.target.value));
   };
 
+  //STATISTICS
   const [gameStats, setGameStats] = useState({
     played: 0,
     correct: 0,
@@ -71,11 +74,13 @@ const App = () => {
 
   const closeStats = () => setShowStats(false);
 
+  //TIMER
   const startTimer = () => {
     setIsActive(true);
     setTimerActive(true);
   };
 
+  //RESTART GAME
   const restartGame = () => {
     setIsActive(false);
     setTimerActive(false);
@@ -95,6 +100,7 @@ const App = () => {
     });
   };
 
+  //TIMER
   const formatTime = () => {
     return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
   };
@@ -117,6 +123,7 @@ const App = () => {
     loadWords();
   }, []);
 
+  //STATISTICS
   useEffect(() => {
     let interval;
 
@@ -162,7 +169,6 @@ const App = () => {
     
     if (!generatedWords.includes(word)) {
       setGeneratedWords(generatedWords => [...generatedWords, word]);
-      //setRoundCounter(roundCounter => roundCounter +1);
       console.log(word);
     } else {
       console.log(word + ' was already generated.');
@@ -174,8 +180,8 @@ const App = () => {
     if (!isActive && generatedWords.length === 0) {
       wordGeneration();
     }
-  }, [isActive, generatedWords, wordGeneration]); 
-  
+  }, [isActive, generatedWords, wordGeneration]);
+
   //CHECKS USER GUESS
   const validGuess = useCallback((currentGuess) => {
     if (currentGuess.length === 5) {
@@ -291,12 +297,9 @@ const App = () => {
 
       {showTutorial && <HowToPlay onClose={closeTutorial} />}
 
-     {/*<div className="stats-icon" onClick={toggleStats}>📊</div>*/}
-
      <p className = "rounds"> Round: {generatedWords.length} </p>
       <div className = "side">
         <p>Counter: {counts}</p>
-       
       </div>
       
       <p className = {seconds < 11 ? 'red-text' : 'normal-text'}>
@@ -313,7 +316,6 @@ const App = () => {
       {showStats && (
         <div className="modal show">
         <div className="modal-content">
-          <span className="close" onClick={closeStats}>&times;</span>
           <h2>STATISTICS</h2>
           <div className="stats-container">
             <div className="stat-item">
@@ -402,7 +404,7 @@ const App = () => {
                 <div className='rounds'>
                   {generatedWords.map((word, index) => (
                     <div key={index+1}> 
-                        <strong>Round {index + 1}:</strong> {/*{index + 1 <= roundCounter ? word : ''}*/}
+                        <strong>Round {index + 1}:</strong> {word} {/*{index + 1 <= roundCounter ? word : ''}*/}
                     </div>
                   ))}
                 </div>
@@ -422,9 +424,3 @@ const App = () => {
 };
 
 export default App;
-
-//get rid of attempts
-//restart button 
-//fade out select time after a game started
-//generate word
-//counter and time moved
