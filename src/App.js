@@ -293,6 +293,16 @@ const App = () => {
 
      {/*<div className="stats-icon" onClick={toggleStats}>📊</div>*/}
 
+     <p className = "rounds"> Round: {generatedWords.length} </p>
+      <div className = "side">
+        <p>Counter: {counts}</p>
+       
+      </div>
+      
+      <p className = {seconds < 11 ? 'red-text' : 'normal-text'}>
+          Time: {formatTime()}
+      </p>
+
      {showStats ? (
         <div className="close-icon" onClick={toggleStats} style={{ backgroundImage: `url(${exitIcon})` }}></div>
       ) : (
@@ -365,8 +375,6 @@ const App = () => {
         )}
         <div>
           {/*<p>Guess History:</p> */}
-          <p>Counter: {counts}</p>
-          <p>{formatTime()}</p>
           <div>
             {guessHistory.map((word, index) => (
               <div key={index} className="grid">

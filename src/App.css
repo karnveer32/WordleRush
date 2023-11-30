@@ -37,6 +37,21 @@ to {
 }
 }
 
+h1 {
+  border-bottom: 2px solid #bbb; 
+  padding-bottom: 10px; 
+  text-align: center;
+  width: 100%;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  font-size: 40px
+}
+
+.rounds{
+  font-size: x-large;
+  font-weight: bold
+}
+
 .grid {
 display: grid;
 grid-template-columns: repeat(5, 50px);
