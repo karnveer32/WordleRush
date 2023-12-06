@@ -11,6 +11,8 @@ import info from './images/question-circle-svgrepo-com.svg';
 import infoDark from './images/whiteQuestion.svg';
 import lightStats from './images/lightStats.svg';
 import darkStats from './images/darkStats.svg';
+import sun from './images/sun.svg';
+import moon from './images/moon.svg';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -371,13 +373,21 @@ const App = () => {
   return (
     <div className={`App ${theme}`}>
         <h1>WordleRush</h1>
-        <div className='theme-toggle'>
+
+        <input type="checkbox" id="darkmode-toggle" onChange={toggleTheme} />
+      <label className = "label" htmlFor="darkmode-toggle" on>
+          <img src={sun} className="sun"/>
+          <img src={moon} className="moon"/>
+
+      </label>
+
+       {/*} <div className='theme-toggle'>
           <h4>Dark Mode</h4>
           <ReactSwitch
             checked={checked}
             onChange={toggleTheme}
           />
-        </div>
+  </div>*/}
 
         {alertMessage && (
           <div className='custom-alert'>
@@ -398,7 +408,7 @@ const App = () => {
         <p><strong>Timer is Running....</strong></p>
       ) : (
         <div>
-        <label><strong>Select Time: </strong></label>
+        <strong>Select Time: </strong>
         <select value={selectedDuration / 60} onChange={handleDurationChange}>
           <option value={0.5}>30 seconds</option>
           <option value={1}>60 seconds</option>

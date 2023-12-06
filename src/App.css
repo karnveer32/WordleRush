@@ -223,7 +223,7 @@ background: #ffffff;
 .stats-icon, .close-icon {
   position: fixed;
   top: 22px;
-  right: 175px;
+  right: 90px;
   z-index: 12; 
   cursor: pointer;
   width: 30px;
@@ -289,7 +289,7 @@ background-color: #add8e6; /* Light blue for keys pressed */
 .Tutorial {
   position: fixed;
   top: 15px;
-  right: 200px;
+  right: 110px;
   cursor: pointer;
   width: 30px;
   height: 30px;
@@ -441,4 +441,80 @@ background-color: #add8e6; /* Light blue for keys pressed */
   color: #fff;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+label {
+  width: 60px;
+  height: 30px;
+  position: fixed; 
+  right: 10px; 
+  top: 25px; 
+  display: block;
+  background: #ebebeb;
+  border-radius: 200px;
+  box-shadow: inset 0px 5px 15px rgba(0, 0, 0, 0.4), inset 0px -5px 15px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+label:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: linear-gradient(180deg, #ffcc89, #d8860b);
+  border-radius: 10px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+label img {
+  position: absolute;
+  width: 15px;
+  top: 7px;
+  left: 7px;
+  z-index: 50;
+}
+
+label img.sun {
+  fill: #fff;
+  transition: 0.3s;
+}
+
+label img.moon {
+  left: 38px;
+  fill: #7e7e7e;
+  transition: 0.3s;
+}
+
+input:checked + label {
+  background: #242424;
+}
+
+input:checked + label:after {
+  left: 55px;
+  transform: translateX(-100%);
+  background: linear-gradient(180deg, #777, #3a3a3a);
+}
+input {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+input:checked + label img.sun {
+  fill: #7e7e7e;
+}
+
+input:checked + label img.moon {
+  fill: #fff;
+}
+
+label,
+label:after {
+  transition: 0.3s;
+}
+
+label:active:after {
+  width: 30px;
 }
