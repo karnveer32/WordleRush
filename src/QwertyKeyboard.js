@@ -1,105 +1,69 @@
 import React, { useState, useEffect } from 'react';
 
-const QwertyKeyboard = ({ onKeyPress, guessHistory, currentWord, currentGuess, attempts }) => {
+const QwertyKeyboard = ({ onKeyPress, guessHistory, currentWord, attempts }) => {
   const [prevGreen, setPrevGreen] = useState([]);
   const [prevYellow, setPrevYellow] = useState([]);
   const [prevGrey, setPrevGrey] = useState([]);
-  
-  useEffect(() => {
-    resetKeyColors();
-  }, [currentWord]);
 
-  const resetKeyColors = () => {
+  useEffect(() => {
+    determineKeyColors();
+  }, [currentWord, guessHistory]); //re-evaluate the coloring for each guessHistory entry (only yellow)
+
+  useEffect(() => {
+      // Reset key colors when currentWord changes (All colors)
     setPrevGreen([]);
     setPrevYellow([]);
-  };
+    setPrevGrey([]);
+  }, [currentWord]);
+
 
   const handleKeyPress = (key) => {
-      onKeyPress({ key });
-     // console.log("Current Word:", currentWord);
+    onKeyPress({ key });
   };
 
-  const determineKeyColor = (key) => {
-    if (attempts === 0) {
-      setPrevGreen([]);
-    }
-    //console.log(guessHistory)
+  const determineKeyColors = () => {
     if (!guessHistory || !currentWord) {
-      return '';
-   }
-   
-   const lastGuessedWord = guessHistory.reduceRight((acc, current) => {
-    if (current !== undefined && acc === undefined) {
-      return current;
+      return;
     }
-    return acc;
-  }, undefined);
 
-  
-  //console.log(lastGuessedWord); 
-
-  
-  if (lastGuessedWord !== undefined && lastGuessedWord.length === currentWord.length) {
-    for (let i = 0; i < lastGuessedWord.length; i++) {
-      const guessedLetter = lastGuessedWord[i];
-      const currentLetter = currentWord[i];
-      
-
-      if (key === guessedLetter && key === currentLetter) {
-        setPrevGreen(prevGreen => [...prevGreen, key]);
-        return 'correct'; 
-      } else if (guessedLetter.includes(key) && currentWord.includes(key)) {
-        setPrevYellow(prevYellow => [...prevYellow, key]);
-        return 'in-guess'; 
+    const lastGuessedWord = guessHistory.reduceRight((acc, current) => {
+      if (current !== undefined && acc === undefined) {
+        return current;
       }
-      else if (key === guessedLetter){
-        setPrevGrey(prevGrey => [...prevGrey, key]);
-        return 'not-included'
+      return acc;
+    }, undefined);
+
+    if (lastGuessedWord !== undefined && lastGuessedWord.length === currentWord.length) {
+      const newGreen = [...prevGreen];
+      const newYellow = [...prevYellow];
+      const newGrey = [...prevGrey];
+
+      for (let i = 0; i < lastGuessedWord.length; i++) {
+        const guessedLetter = lastGuessedWord[i];
+        const currentLetter = currentWord[i];
+
+        if (guessedLetter === currentLetter && !prevGreen.includes(guessedLetter)) {
+          newGreen.push(guessedLetter);
+          const index = newYellow.indexOf(guessedLetter);
+          if (index !== -1) {
+            newYellow.splice(index, 1);
+          }
+        } else if (currentWord.includes(guessedLetter) && !prevGreen.includes(guessedLetter) && !prevYellow.includes(guessedLetter)) {
+          newYellow.push(guessedLetter);
+          const index = newGrey.indexOf(guessedLetter);
+          if (index !== -1) {
+            newGrey.splice(index, 1);
+          }
+        } else if (!prevGreen.includes(guessedLetter) && !prevYellow.includes(guessedLetter) && !prevGrey.includes(guessedLetter)) {
+          newGrey.push(guessedLetter);
+        }
       }
+
+      setPrevGreen(newGreen);
+      setPrevYellow(newYellow);
+      setPrevGrey(newGrey);
     }
-  }
-  
-/*
-  if(lastGuessedWord != undefined){
-    if(key = guessed)
-    if(currentWord.includes(key) && lastGuessedWord.includes(key)){
-      return 'in-guess'
-    }
-  }
-*/
-    return '';
   };
-
-  const checkYellow = (key) => {
-   const lastGuessedWord = guessHistory.reduceRight((acc, current) => {
-    if (current !== undefined && acc === undefined) {
-      return current;
-    }
-    return acc;
-  }, undefined);
-  
-  console.log(lastGuessedWord); 
-
-  
-  if (lastGuessedWord && lastGuessedWord.length === currentWord.length) {
-    for (let i = 0; i < lastGuessedWord.length; i++) {
-      const guessedLetter = lastGuessedWord[i];
-      const currentLetter = currentWord[i];
-
-      if (key === guessedLetter && key === currentLetter) {
-        setPrevGreen(prevGreen => [...prevGreen, key]);
-        console.log("prevgreen: ", prevGreen)
-        return 'correct'; 
-      }
-      else{
-        console.log("prevYellow: ", prevYellow)
-        return 'in-guess'
-      }
-      
-    }
-  }
-}
-
 
   const qwertyRows = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -112,23 +76,15 @@ const QwertyKeyboard = ({ onKeyPress, guessHistory, currentWord, currentGuess, a
       {qwertyRows.map((row, rowIndex) => (
         <div key={rowIndex} className="keyboard-row">
           {row.map((key) => {
-            let keyColor;
-              if(!prevGreen.includes(key)){
-                if(prevYellow.includes(key)){
-                  keyColor = checkYellow(key);
-                  
-                }
-                else if(prevGrey.includes(key)){
-                  keyColor = 'not-included'
-                }
-                else{
-                  keyColor = determineKeyColor(key);
-                }
-             }
-            
-              else{
-                keyColor = 'correct'
-              }
+            let keyColor = '';
+
+            if (prevGreen.includes(key)) {
+              keyColor = 'correct';
+            } else if (prevYellow.includes(key)) {
+              keyColor = 'in-guess';
+            } else if (prevGrey.includes(key)) {
+              keyColor = 'not-included';
+            }
 
             return (
               <div

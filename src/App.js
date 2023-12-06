@@ -3,10 +3,14 @@ import './App.css';
 import Grid from './Grid';
 import checker from './checker';
 import QwertyKeyboard from './QwertyKeyboard';
-import statsIcon from './images/stats-icon.png'
-import exitIcon from './images/x-out.png'
 import HowToPlay from './HowToPlay';
 import ReactSwitch from 'react-switch';
+import restartIcon from './images/redo-svgrepo-com.svg';
+import darkRestartIcon from './images/whiteRedo.svg';
+import info from './images/question-circle-svgrepo-com.svg';
+import infoDark from './images/whiteQuestion.svg';
+import lightStats from './images/lightStats.svg';
+import darkStats from './images/darkStats.svg';
 
 const App = () => {
   const [words, setWords] = useState([]);
@@ -19,14 +23,32 @@ const App = () => {
   const [guessHistory, setGuessHistory] = useState(new Array(6).fill(undefined));
   const [isActive, setIsActive] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(0.5);
-  const [seconds, setSeconds] = useState(selectedDuration * 60);
+  const [selectedDuration, setSelectedDuration] = useState(30);
+  const [seconds, setSeconds] = useState(selectedDuration);
   const [showStats, setShowStats] = useState(false);
   const [userStartedTyping, setUserStartedTyping] = useState(false);
-  const [rounds, setRounds] = useState(0);
+  //const [rounds, setRounds] = useState(0);
   const [showTutorial, setTutorial] = useState(false);
   const [theme, setTheme] = useState('light');
   const [checked, setChecked] = useState(false);
+  const [showCopyPopup, setShowCopyPopup] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
+    //COPY TO CLIPBOARD
+  const copyStatsToClipboard = () => {
+      const stats = `WordleRush Game Stats:
+    Rounds Played: ${generatedWords.length}
+    Time: ${displayFormattedTime(gameStats.time)}
+    Correct Guesses: ${gameStats.correct}`;
+      
+      navigator.clipboard.writeText(stats).then(() => {
+        setShowCopyPopup(true);
+        setTimeout(() => setShowCopyPopup(false), 2000); 
+      }, (err) => {
+        console.error('Could not copy text: ', err);
+      });
+    };
 
   //DARK & LIGHT MODE FUNCTIONS
   const toggleTheme = val => {
@@ -42,6 +64,24 @@ const App = () => {
     document.body.className = theme;
   }, [theme]);
 
+
+  const infoSvg = theme === 'light' ? info : infoDark;
+  const restartSvg = theme === 'light' ? restartIcon : darkRestartIcon;
+  const statSvg = theme === 'light' ? lightStats : darkStats;
+
+  // STATS/EXIT ICON
+  const StatsIcon = () => (
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 12H4.6C4.03995 12 3.75992 12 3.54601 12.109C3.35785 12.2049 3.20487 12.3578 3.10899 12.546C3 12.7599 3 13.0399 3 13.6V19.4C3 19.9601 3 20.2401 3.10899 20.454C3.20487 20.6422 3.35785 20.7951 3.54601 20.891C3.75992 21 4.03995 21 4.6 21H9M9 21H15M9 21L9 8.6C9 8.03995 9 7.75992 9.10899 7.54601C9.20487 7.35785 9.35785 7.20487 9.54601 7.10899C9.75992 7 10.0399 7 10.6 7H13.4C13.9601 7 14.2401 7 14.454 7.10899C14.6422 7.20487 14.7951 7.35785 14.891 7.54601C15 7.75992 15 8.03995 15 8.6V21M15 21H19.4C19.9601 21 20.2401 21 20.454 20.891C20.6422 20.7951 20.7951 20.6422 20.891 20.454C21 20.2401 21 19.9601 21 19.4V4.6C21 4.03995 21 3.75992 20.891 3.54601C20.7951 3.35785 20.6422 3.20487 20.454 3.10899C20.2401 3 19.9601 3 19.4 3H16.6C16.0399 3 15.7599 3 15.546 3.10899C15.3578 3.20487 15.2049 3.35785 15.109 3.54601C15 3.75992 15 4.03995 15 4.6V8" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const ExitIcon = () => (
+    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.7457 3.32851C20.3552 2.93798 19.722 2.93798 19.3315 3.32851L12.0371 10.6229L4.74275 3.32851C4.35223 2.93798 3.71906 2.93798 3.32854 3.32851C2.93801 3.71903 2.93801 4.3522 3.32854 4.74272L10.6229 12.0371L3.32856 19.3314C2.93803 19.722 2.93803 20.3551 3.32856 20.7457C3.71908 21.1362 4.35225 21.1362 4.74277 20.7457L12.0371 13.4513L19.3315 20.7457C19.722 21.1362 20.3552 21.1362 20.7457 20.7457C21.1362 20.3551 21.1362 19.722 20.7457 19.3315L13.4513 12.0371L20.7457 4.74272C21.1362 4.3522 21.1362 3.71903 20.7457 3.32851Z" fill="#0F0F0F"/>
+    </svg>
+  );
+
   //TUTORIAL FUNCTIONS
   const displayTutorial = () => {
     setTutorial(true);
@@ -53,8 +93,27 @@ const App = () => {
 
   //TIMER
   const handleDurationChange = (event) => {
-    setSelectedDuration(parseFloat(event.target.value));
-    setSeconds(parseFloat(event.target.value));
+    const durationInSeconds = parseFloat(event.target.value) * 60;
+    setSelectedDuration(durationInSeconds);
+    setSeconds(durationInSeconds);
+
+    setGameStats((prevStats) => ({
+      ...prevStats,
+      time:durationInSeconds,
+    }));
+  };
+
+  
+  const displayFormattedTime = (timeInSeconds) => {
+    if (timeInSeconds >= 60) {
+      const minutes = Math.floor(timeInSeconds / 60);
+      const remainingSeconds = timeInSeconds % 60;
+      return `${minutes} minute(s)` + (remainingSeconds > 0 ? ` ${remainingSeconds} second(s)` : '');
+    } else if (timeInSeconds > 0) { 
+      return `${timeInSeconds} second(s)`;
+    } else {
+      return `0 second(s)`; 
+    }
   };
 
   //STATISTICS
@@ -78,6 +137,7 @@ const App = () => {
   const startTimer = () => {
     setIsActive(true);
     setTimerActive(true);
+    //setSeconds(selectedDuration);
   };
 
   //RESTART GAME
@@ -93,11 +153,12 @@ const App = () => {
     Counter(0); // Reset counts
     setGuessHistory(new Array(6).fill(undefined));
     setSeconds(selectedDuration);
-    setGameStats({
-      played: 0,
+    setGameStats((prevStats) => ({
+      ...prevStats,
       correct: 0,
       time: selectedDuration,
-    });
+    }));
+    //setRounds(0);
   };
 
   //TIMER
@@ -108,7 +169,7 @@ const App = () => {
   useEffect(() => {
     async function loadWords() {
       try {
-        const response = await fetch('temp_words.txt');
+        const response = await fetch('clean_words.txt');
         if (!response.ok) {
           throw new Error('Network response was not ok.');
         }
@@ -159,7 +220,7 @@ const App = () => {
     GuessAttempts(0);
     setCurrentGuess('');
     setUserStartedTyping(false);
-    setRounds(rounds => rounds + 1);
+    //setRounds(rounds => rounds + 1);
 
     let num = Math.floor(Math.random() * words.length);
     let word = words[num].toUpperCase();
@@ -182,9 +243,27 @@ const App = () => {
     }
   }, [isActive, generatedWords, wordGeneration]);
 
+
+  const showCustomAlert = (message) => {
+    setAlertMessage(message);
+    
+    //Clear the alert after 1 seconds
+    setTimeout(() => {
+      setAlertMessage('');
+    }, 1000);
+  };
+
   //CHECKS USER GUESS
   const validGuess = useCallback((currentGuess) => {
-    if (currentGuess.length === 5) {
+    if (currentGuess.length !== 5) {
+      showCustomAlert("Not enough letters")
+    }
+
+    else if(!words.includes(currentGuess.toLowerCase())) {
+      showCustomAlert("Not in word list")
+    }
+    
+    else if (currentGuess.length === 5 && words.includes(currentGuess.toLowerCase())) {
       const isCorrect = checker(currentGuess, currentWord);
       const updatedInputBoxes = [...inputBoxes];
 
@@ -214,15 +293,23 @@ const App = () => {
 
         if (attempts === 5) {
           wordGeneration();
+          //setRounds((prevRounds) => prevRounds + 1);
           setCurrentGuess('');
         }
       } else {
         Counter((counts) => counts + 1);
         wordGeneration();
+        //setRounds((prevRounds) => prevRounds + 1);
         setCurrentGuess('');
       }
     }
-  }, [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes, guessHistory]);
+  }, [currentWord, GuessAttempts, attempts, wordGeneration, setCurrentGuess, inputBoxes, guessHistory, words]);
+
+  useEffect(() => {
+    return() => {
+      setAlertMessage('');
+    }
+  }, []);
 
   //CAPITALIZES THE GUESS
   function isAlpha(str) {
@@ -235,6 +322,7 @@ const App = () => {
       if (!userStartedTyping) {
         setUserStartedTyping(true);
         startTimer();
+        setGameStarted(true);
       }
       if (timerActive) {
         if (isAlpha(key)) {
@@ -291,30 +379,60 @@ const App = () => {
           />
         </div>
 
-      <div className="Tutorial" onClick={displayTutorial}>
-        <span>ℹ️</span>
+        {alertMessage && (
+          <div className='custom-alert'>
+            {alertMessage}
+          </div>
+        )}
+
+      <div className='Tutorial' onClick={displayTutorial}>
+        {/*<button onClick={restartGame}> Restart Game </button>*/}
+          <img src={ infoSvg} alt="tutorial"/>
       </div>
 
       {showTutorial && <HowToPlay onClose={closeTutorial} />}
 
+    <div className='left'>
+
+    {timerActive ? (
+        <p><strong>Timer is Running....</strong></p>
+      ) : (
+        <div>
+        <label><strong>Select Time: </strong></label>
+        <select value={selectedDuration / 60} onChange={handleDurationChange}>
+          <option value={0.5}>30 seconds</option>
+          <option value={1}>60 seconds</option>
+          <option value={1.5}>90 seconds</option>
+          <option value={2}>120 seconds</option>
+        </select>
+      </div>
+      )}
+     
+     <p className = {seconds < 11 ? 'red-text' : 'normal-text'}>
+      <strong>Time:</strong> {formatTime()}
+        </p>
+
      <p className = "rounds"> Round: {generatedWords.length} </p>
       <div className = "side">
-        <p>Counter: {counts}</p>
+        <p><strong>Counter: </strong>{counts}</p>
       </div>
-      
-      <p className = {seconds < 11 ? 'red-text' : 'normal-text'}>
-          Time: {formatTime()}
-      </p>
 
-     {showStats ? (
-        <div className="close-icon" onClick={toggleStats} style={{ backgroundImage: `url(${exitIcon})` }}></div>
-      ) : (
-        <div className="stats-icon" onClick={toggleStats} style={{ backgroundImage: `url(${statsIcon})` }}></div>
-      )}
+      <div className='timerOption'>
+    
+    </div>
+    </div>
+
+      {/*<div className="stats-icon" onClick={toggleStats}>
+          <StatsIcon />
+      </div>*/}
+      <div className='stats-icon' onClick={toggleStats}>
+        {/*<button onClick={restartGame}> Restart Game </button>*/}
+          <img src={statSvg} alt="stats"/>
+      </div>
 
 
       {showStats && (
-        <div className="modal show">
+        <div className="modal-overlay">
         <div className="modal-content">
           <h2>STATISTICS</h2>
           <div className="stats-container">
@@ -324,101 +442,86 @@ const App = () => {
             </div>
             <div className="stat-item">
               <span className="stat-label">Rounds Played: </span>
-              <span className="stat-value">{rounds}</span>
+              <span className="stat-value">{gameStarted ? generatedWords.length : 0}</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Time: </span>
-              <span className="stat-value">{gameStats.time} second(s)</span>
+              <span className="stat-value">{displayFormattedTime(gameStats.time)}</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Correct Guesses: </span>
               <span className="stat-value">{gameStats.correct}</span>
             </div>
             {seconds === 0 && attempts > 0 && (
-              <div>
-                <p>Time's Up! The correct words were:</p>
-                <ul>
-                  {generatedWords.map((word, index) => (
-                    <div key={index}>
-                      <strong>Round {index + 1}:</strong> {word}
-                    </div>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
-
-      <div>
-        {timerActive ? (
-          <p>Timer is Running....</p>
-        ) : (
-          <div>
-          <label>Select Time:</label>
-          <select value={selectedDuration} onChange={handleDurationChange}>
-            <option value={30}>30 seconds</option>
-            <option value={60}>60 seconds</option>
-            <option value={90}>90 seconds</option>
-            <option value={120}>120 seconds</option>
-          </select>
-        </div>
-        )}
-      </div>
-
-      {/*<button onClick={wordGeneration}>Generate Word</button>*/}
-      <button onClick={restartGame}> Restart Game </button>
-
-      <div>
-        {/*<p>Attempts: {attempts}/6</p>*/}
-        {currentWord && (
-          <Grid guesses={guessHistory} currentGuess={currentGuess} attempt={attempts} currentWord={currentWord} />
-        )}
-        <div>
-          {/*<p>Guess History:</p> */}
-          <div>
-            {guessHistory.map((word, index) => (
-              <div key={index} className="grid">
-                {word && word.inputBoxes && word.inputBoxes.map((letter, boxIndex) => (
-                  <input
-                    key={boxIndex}
-                    type="text"
-                    defaultValue={letter}
-                    disabled={true}
-                    className={
-                      letter === currentWord[boxIndex]
-                        ? 'box green'
-                        : letter && currentWord.includes(letter)
-                        ? 'box yellow'
-                        : 'box grey'
-                    }
-                  />
+              <div className="correct-words-list">
+              <h3>Correct Words:</h3>
+              <ul>
+                {generatedWords.map((word, index) => (
+                  <li key={index}><strong>Round {index + 1}:</strong> {word}</li>
                 ))}
-              </div>
-            ))}
-          </div>
-          {seconds === 0 && (
-            <div>
-              <p>Time's Up! The correct words were:</p>
-                <div className='rounds'>
-                  {generatedWords.map((word, index) => (
-                    <div key={index+1}> 
-                        <strong>Round {index + 1}:</strong> {word} {/*{index + 1 <= roundCounter ? word : ''}*/}
-                    </div>
-                  ))}
-                </div>
+              </ul>
             </div>
           )}
         </div>
+        {/* Close button for the stats modal */}
+        <button className="close" onClick={() => setShowStats(false)}>X</button>
+        <button className="share-button" onClick={copyStatsToClipboard}>Share</button>
       </div>
-      {/* Render the QwertyKeyboard component underneath the grid */}
-      <QwertyKeyboard
-	  onKeyPress={userInput}
-	  guessHistory={guessHistory}
-	  currentWord={currentWord}
-	  currentGuess={currentGuess}
-      />
+    </div>
+  )}
+
+  {showCopyPopup && (
+    <div className="copy-popup">
+      Copied results to clipboard
+    </div>
+  )}
+
+      {/*<button onClick={wordGeneration}>Generate Word</button>*/}
+      <div className='center-container'>
+        <div>
+          {/*<p>Attempts: {attempts}/6</p>*/}
+          {currentWord && (
+            <Grid guesses={guessHistory} currentGuess={currentGuess} attempt={attempts} currentWord={currentWord} />
+          )}
+          <div>
+            {/*<p>Guess History:</p> */}
+            <div>
+              {guessHistory.map((word, index) => (
+                <div key={index} className="grid">
+                  {word && word.inputBoxes && word.inputBoxes.map((letter, boxIndex) => (
+                    <input
+                      key={boxIndex}
+                      type="text"
+                      defaultValue={letter}
+                      disabled={true}
+                      className={
+                        letter === currentWord[boxIndex]
+                          ? 'box green'
+                          : letter && currentWord.includes(letter)
+                          ? 'box yellow'
+                          : 'box grey'
+                      }
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className='restart' onClick={restartGame}>
+        {/*<button onClick={restartGame}> Restart Game </button>*/}
+          <img src={restartSvg} alt="restart"/>
+        </div>
+
+        {/* Render the QwertyKeyboard component underneath the grid */}
+        <QwertyKeyboard
+          onKeyPress={userInput}
+          guessHistory={guessHistory}
+          currentWord={currentWord}
+          currentGuess={currentGuess}
+        />
+      </div>
     </div>
   );
 };

@@ -48,7 +48,7 @@ h1 {
 }
 
 .rounds{
-  font-size: x-large;
+  font-size: large;
   font-weight: bold
 }
 
@@ -167,7 +167,10 @@ background: #ffffff;
   top: 10px;
   right: 20px;
   cursor: pointer;
-  display: inline-block;
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: inherit;
 }
 
 .stats-icon {
@@ -179,7 +182,7 @@ background: #ffffff;
   position: fixed;
   top: 20px; 
   right: 175px;
-  z-index: 11; 
+  z-index: 10; 
 }
 
 .stats-container {
@@ -199,9 +202,27 @@ background: #ffffff;
   font-size: 1.4em;
 }
 
+.correct-words-list h3 {
+  margin-top: 20px;
+  font-size: 1.0em;
+}
+
+.correct-words-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: max-content;
+}
+
+.correct-words-list li {
+  font-size: 1.0em;
+  margin-top: 10px;
+  display: block;
+}
+
 .stats-icon, .close-icon {
   position: fixed;
-  top: 20px;
+  top: 22px;
   right: 175px;
   z-index: 12; 
   cursor: pointer;
@@ -300,6 +321,7 @@ background-color: #add8e6; /* Light blue for keys pressed */
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
@@ -307,6 +329,12 @@ background-color: #add8e6; /* Light blue for keys pressed */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  max-width: 600px;
+  width: 90%;
+  height: auto;
+  overflow-y: auto
 }
 
 .dark {
@@ -314,7 +342,7 @@ background-color: #add8e6; /* Light blue for keys pressed */
   color: #fff;
 }
 .light {
-  background-color: #fff;
+  background-color: #fff8e7;
   color: #333;
 }
 
@@ -333,7 +361,7 @@ background-color: #add8e6; /* Light blue for keys pressed */
 
 
 .keyboard-key.correct {
-  background-color: green; 
+  background-color: #5ac85a; 
 }
 
 .keyboard-key.new {
@@ -341,9 +369,76 @@ background-color: #add8e6; /* Light blue for keys pressed */
 }
 
 .keyboard-key.in-guess {
-  background-color: yellow;
+  background-color: #e2cc68;
 }
 
 .keyboard-key.not-included {
-  background-color: gray;
+  background-color: #a1a1a1;
+}
+
+.copy-popup {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  z-index: 1001;
+}
+
+.share-button {
+  background-color: #4CAF50; 
+  border: none;
+  color: white;
+  padding: 10px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 12px; 
+  box-shadow: 0 4px #999; 
+}
+
+.share-button:hover {
+  background-color: #45a049; 
+}
+
+.share-button:active {
+  background-color: #45a049;
+  box-shadow: 0 2px #666; 
+  transform: translateY(2px); 
+}
+
+.left
+{
+  text-align: left;
+  margin-left: 15%;
+  margin-top: 200px;
+  font-size: large;
+}
+
+.center-container {
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: -300px;
+}
+
+.restart {
+  margin-top: 20px;
+}
+
+.custom-alert {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px;
+  background-color: #f44336;
+  color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
